@@ -1,18 +1,36 @@
 use std::ops::{Index, IndexMut};
 
 #[derive(Copy, Clone, PartialEq)]
-pub enum Cell {
+pub enum Player {
     X,
     O,
-    N,
+}
+
+impl Player {
+    pub fn print(&self) -> &str {
+         match self {
+            Self::X => return "X",
+            Self::O => return "O",
+         }
+     }
+ }
+
+#[derive(Copy, Clone, PartialEq)]
+pub enum Cell {
+    Empty,
+    Filled(Player),
 }
 
 impl Cell {
    pub fn print(&self) -> &str {
         match self {
-            Self::X => return "X",
-            Self::O => return "O",
-            Self::N => return " ",
+            Self::Empty => return " ",
+            Self::Filled(player) => {
+                match player {
+                    Player::X => return "X",
+                    Player::O => return "O",
+                }
+            }
         }
     }
 }
@@ -44,11 +62,11 @@ pub struct Board{
 
 impl Board {
     pub fn new() -> Self {
-        Self {board_state: [[Cell::N; 3]; 3]}
+        Self {board_state: [[Cell::Empty; 3]; 3]}
     }
 
-    pub fn play_move(&mut self, place: Place, player: &Cell) {
-        self[&place] = player.clone();
+    pub fn play_move(&mut self, place: Place, player: &Player) {
+        self[&place] = Cell::Filled(player.clone());
     }
 
     pub fn print(&self) -> String {
@@ -81,7 +99,7 @@ impl IndexMut<&Place> for Board {
 }
 
 pub enum Winner {
-    Won(Cell),
+    Won(Player),
     Draw,
 }
 

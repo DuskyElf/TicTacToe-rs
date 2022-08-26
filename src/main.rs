@@ -20,7 +20,7 @@ fn main() {
 
 fn game_loop() -> GameResult {
     let mut board = Board::new();
-    let mut current_player = Cell::X;
+    let mut current_player = Player::X;
     let mut game_lap = 0;
 
     loop {
@@ -33,9 +33,9 @@ fn game_loop() -> GameResult {
 
         let winner = check_winner(&board);
 
-        if winner != Cell::N {
+        if let Some(player) = winner {
             return GameResult {
-                winner: Winner::Won(winner),
+                winner: Winner::Won(player),
                 game_lap,
             };
         }
@@ -49,7 +49,7 @@ fn game_loop() -> GameResult {
     }
 }
 
-fn ask_player(player: &Cell, game_lap: u8, board: &Board) -> Place {
+fn ask_player(player: &Player, game_lap: u8, board: &Board) -> Place {
     loop {
         let row = input_point(&player, game_lap, "row");
         let collum = input_point(&player, game_lap, "collum");
@@ -58,7 +58,7 @@ fn ask_player(player: &Cell, game_lap: u8, board: &Board) -> Place {
     }
 }
 
-fn input_point(player: &Cell, game_lap: u8, place_holder: &str) -> Point{
+fn input_point(player: &Player, game_lap: u8, place_holder: &str) -> Point{
     loop {
         let mut buffer = String::new();
         print!("[{}] Player {} your turn, {} number (1, 2, 3): ",
@@ -87,56 +87,55 @@ fn input_point(player: &Cell, game_lap: u8, place_holder: &str) -> Point{
 }
 
 fn is_valid(place: &Place, board: &Board) -> bool {
-    board[place] == Cell::N
+    board[place] == Cell::Empty
 }
 
-fn increment_player(current_player: Cell) -> Cell {
-    if current_player == Cell::X {
-        Cell::O
+fn increment_player(current_player: Player) -> Player {
+    if current_player == Player::X {
+        Player::O
     } else {
-        Cell::X
+        Player::X
     }
 }
 
-fn check_winner(board: &Board) -> Cell {
+fn check_winner(board: &Board) -> Option<Player> {
     let b = board.board_state;
 
     for i in 0..3 {
         // Horizontal Checks
-        if b[i][0] != Cell::N {
+        if let Cell::Filled(player) = b[i][0] {
             if b[i][0] == b[i][1] && b[i][1] == b[i][2] {
-                return b[i][0];
+                return Some(player);
             }
         }
 
         // Vertical Checks
-        if b[0][i] != Cell::N {
+        if let Cell::Filled(player) = b[0][i] {
             if b[0][i] == b[1][i] && b[1][i] == b[2][i] {
-                return b[0][i];
+                return Some(player);
             }
         }
     }
 
-    // Diagonal Checks
-    if b[0][0] != Cell::N {
+    if let Cell::Filled(player) = b[0][0] {
         if b[0][0] == b[1][1] && b[1][1] == b[2][2] {
-            return b[0][0];
+            return Some(player);
         }
     }
 
-    if b[2][0] != Cell::N {
+    if let Cell::Filled(player) = b[0][2] {
         if b[2][0] == b[1][1] && b[1][1] == b[0][2] {
-            return b[2][0];
+            return Some(player);
         }
     }
 
-    Cell::N
+    None
 }
 
 fn check_draw(board: &Board) -> bool {
     for i in board.board_state {
         for cell in i {
-            if cell == Cell::N {
+            if cell == Cell::Empty {
                 return false;
             }
         }
