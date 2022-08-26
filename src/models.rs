@@ -79,3 +79,13 @@ impl IndexMut<&Place> for Board {
         &mut self.board_state[index.row.value()][index.collum.value()]
     } 
 }
+
+pub enum Winner {
+    Won(Cell),
+    Draw,
+}
+
+pub struct GameResult {
+    pub winner: Winner,
+    pub game_lap: u8,
+}
